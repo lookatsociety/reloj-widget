@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Widget de Reloj</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #191919; /* Modo oscuro por defecto */
+            transition: background-color 0.3s;
+        }
+
+        .container {
+            position: relative;
+        }
+
+        .clock-widget {
+            width: 150px; /* Tamaño del widget */
+            height: 150px; /* Tamaño del widget */
+            border-radius: 15px; /* Esquinas redondeadas */
+            background-color: #1f1f1f; /* Fondo oscuro por defecto */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Sombra detrás */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: #fff; /* Color del texto */
+            text-align: center;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .toggle-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 30px;
+            height: 30px;
+            background-color: #333;
+            color: #fff;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .light-mode .clock-widget {
+            background-color: #fff;
+            color: #333;
+        }
+
+        .light-mode {
+            background-color: #f0f0f0;
+        }
+
+        .light-mode .toggle-button {
+            background-color: #f0f0f0;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="clock-widget" id="clock">
+            <!-- La hora actual se actualizará aquí -->
+        </div>
+        <button class="toggle-button" id="toggle-btn">&#9788;</button>
+    </div>
+
+    <script>
+        function updateClock() {
+            const now = new Date();
+            const hours = now.getHours().toString().padStart(2, '0');
+            const minutes = now.getMinutes().toString().padStart(2, '0');
+            const seconds = now.getSeconds().toString().padStart(2, '0');
+            document.getElementById('clock').textContent = `${hours}:${minutes}:${seconds}`;
+        }
+
+        setInterval(updateClock, 1000); // Actualiza el reloj cada segundo
+        updateClock(); // Inicializa el reloj al cargar la página
+
+        document.getElementById('toggle-btn').addEventListener('click', () => {
+            document.body.classList.toggle('light-mode');
+            const toggleBtn = document.getElementById('toggle-btn');
+            if (document.body.classList.contains('light-mode')) {
+                toggleBtn.innerHTML = '&#9790;'; // Icono de noche
+            } else {
+                toggleBtn.innerHTML = '&#9788;'; // Icono de día
+            }
+        });
+    </script>
+</body>
+</html>
