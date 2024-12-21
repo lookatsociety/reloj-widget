@@ -12,7 +12,7 @@
             justify-content: center;
             align-items: center;
             height: 100vh;
-            background-color: #191919; /* Modo oscuro por defecto */
+            background-color: #191919;
             transition: background-color 0.3s;
         }
 
@@ -21,26 +21,35 @@
         }
 
         .clock-widget {
-            width: 150px; /* Tamaño del widget */
-            height: 150px; /* Tamaño del widget */
-            border-radius: 15px; /* Esquinas redondeadas */
-            background-color: #1f1f1f; /* Fondo oscuro por defecto */
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Sombra detrás */
+            width: 90vw;
+            max-width: 300px;
+            height: 90vw;
+            max-height: 300px;
+            border-radius: 15px;
+            background-color: #1f1f1f;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 24px;
-            color: #fff; /* Color del texto */
+            color: #fff;
             text-align: center;
             transition: background-color 0.3s, color 0.3s;
         }
 
-        .toggle-button {
+        .clock-text {
+            font-size: 10vw;
+            max-font-size: 64px;
+            transition: font-size 0.2s ease;
+        }
+
+        .small-text {
+            font-size: 7vw;
+        }
+
+        .toggle-button, .menu-button {
             position: absolute;
-            top: 10px;
-            right: 10px;
-            width: 30px;
-            height: 30px;
+            width: 35px;
+            height: 35px;
             background-color: #333;
             color: #fff;
             border: none;
@@ -53,6 +62,46 @@
             transition: background-color 0.3s, color 0.3s;
         }
 
+        .toggle-button {
+            top: 10px;
+            right: 10px;
+        }
+
+        .menu-button {
+            top: 10px;
+            left: 10px;
+        }
+
+        .menu {
+            position: absolute;
+            top: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 280px;
+            max-width: 90vw;
+            background-color: #1f1f1f;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            display: none;
+            flex-direction: column;
+            gap: 15px;
+            color: #fff;
+            font-size: 14px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .menu select, .menu label {
+            background-color: #333;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            padding: 10px;
+            width: 100%;
+            font-size: 16px;
+        }
+
         .light-mode .clock-widget {
             background-color: #fff;
             color: #333;
@@ -62,8 +111,14 @@
             background-color: #f0f0f0;
         }
 
-        .light-mode .toggle-button {
+        .light-mode .toggle-button,
+        .light-mode .menu-button {
             background-color: #f0f0f0;
+            color: #333;
+        }
+
+        .light-mode .menu {
+            background-color: #fff;
             color: #333;
         }
     </style>
@@ -71,31 +126,91 @@
 <body>
     <div class="container">
         <div class="clock-widget" id="clock">
-            <!-- La hora actual se actualizará aquí -->
+            <span class="clock-text" id="clock-text">00:00</span>
         </div>
         <button class="toggle-button" id="toggle-btn">&#9788;</button>
+        <button class="menu-button" id="menu-btn">&#9776;</button>
+
+        <div class="menu" id="config-menu">
+            <label>
+                Formato:
+                <select id="format">
+                    <option value="24" selected>24 horas</option>
+                    <option value="12">12 horas</option>
+                </select>
+            </label>
+            <label>
+                Zona Horaria:
+                <select id="timezone"></select>
+            </label>
+        </div>
     </div>
 
     <script>
+        let format = 24;
+        let timezone = 'local';
+
+        // Llenar el selector con todas las zonas horarias disponibles
+        const timezoneSelector = document.getElementById('timezone');
+        const timezones = Intl.supportedValuesOf('timeZone');
+        timezones.forEach(tz => {
+            const option = document.createElement('option');
+            option.value = tz;
+            option.textContent = tz;
+            timezoneSelector.appendChild(option);
+        });
+        timezoneSelector.value = 'local';
+
         function updateClock() {
             const now = new Date();
-            const hours = now.getHours().toString().padStart(2, '0');
+            let hours = now.getHours();
             const minutes = now.getMinutes().toString().padStart(2, '0');
-            const seconds = now.getSeconds().toString().padStart(2, '0');
-            document.getElementById('clock').textContent = `${hours}:${minutes}:${seconds}`;
+
+            if (format === 12) {
+                hours = hours % 12 || 12;
+            }
+
+            let timeString;
+            if (timezone !== 'local') {
+                const options = { timeZone: timezone, hour: '2-digit', minute: '2-digit', hour12: format === 12 };
+                timeString = new Intl.DateTimeFormat('es-ES', options).format(now);
+            } else {
+                timeString = `${hours.toString().padStart(2, '0')}:${minutes}`;
+            }
+
+            const clockText = document.getElementById('clock-text');
+            clockText.textContent = timeString;
+
+            // Reducir el tamaño si es formato de 12 horas
+            if (format === 12) {
+                clockText.classList.add('small-text');
+            } else {
+                clockText.classList.remove('small-text');
+            }
         }
 
-        setInterval(updateClock, 1000); // Actualiza el reloj cada segundo
-        updateClock(); // Inicializa el reloj al cargar la página
+        setInterval(updateClock, 1000);
+        updateClock();
 
         document.getElementById('toggle-btn').addEventListener('click', () => {
             document.body.classList.toggle('light-mode');
             const toggleBtn = document.getElementById('toggle-btn');
-            if (document.body.classList.contains('light-mode')) {
-                toggleBtn.innerHTML = '&#9790;'; // Icono de noche
-            } else {
-                toggleBtn.innerHTML = '&#9788;'; // Icono de día
-            }
+            toggleBtn.innerHTML = document.body.classList.contains('light-mode') ? '&#9790;' : '&#9788;';
+        });
+
+        document.getElementById('menu-btn').addEventListener('click', () => {
+            const menu = document.getElementById('config-menu');
+            menu.style.display = menu.style.display === 'flex' ? 'none' : 'flex';
+        });
+
+        document.getElementById('format').addEventListener('change', (e) => {
+            format = parseInt(e.target.value);
+            updateClock();
+        });
+
+        timezoneSelector.addEventListener('change', (e) => {
+            timezone = e.target.value;
+            updateClock();
         });
     </script>
 </body>
