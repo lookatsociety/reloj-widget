@@ -37,13 +37,10 @@
         }
 
         .clock-text {
-            font-size: 10vw;
-            max-font-size: 64px;
-            transition: font-size 0.2s ease;
-        }
-
-        .small-text {
-            font-size: 7vw;
+            font-size: clamp(30px, 12vw, 64px);
+            line-height: 1;
+            white-space: nowrap;
+            transition: font-size 0.3s ease;
         }
 
         .toggle-button, .menu-button {
@@ -181,11 +178,11 @@
             const clockText = document.getElementById('clock-text');
             clockText.textContent = timeString;
 
-            // Reducir el tamaño si es formato de 12 horas
+            // Reducir el tamaño si el formato es 12 horas
             if (format === 12) {
-                clockText.classList.add('small-text');
+                clockText.style.fontSize = 'clamp(24px, 10vw, 54px)';
             } else {
-                clockText.classList.remove('small-text');
+                clockText.style.fontSize = 'clamp(30px, 12vw, 64px)';
             }
         }
 
