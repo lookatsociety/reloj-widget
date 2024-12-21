@@ -37,7 +37,7 @@
         }
 
         .clock-text {
-            font-size: clamp(30px, 12vw, 64px);
+            font-size: clamp(36px, 14vw, 72px); /* Aumenta el tamaño de la fuente */
             line-height: 1;
             white-space: nowrap;
             transition: font-size 0.3s ease;
@@ -99,23 +99,24 @@
             font-size: 16px;
         }
 
+        /* Modo Claro con Blanco de Notion */
         .light-mode .clock-widget {
-            background-color: #fff;
+            background-color: #FFFFFFF8; /* Blanco de Notion */
             color: #333;
         }
 
         .light-mode {
-            background-color: #f0f0f0;
+            background-color: #FFFFFFF8; /* Blanco de Notion */
         }
 
         .light-mode .toggle-button,
         .light-mode .menu-button {
-            background-color: #f0f0f0;
+            background-color: #FFFFFFF8;
             color: #333;
         }
 
         .light-mode .menu {
-            background-color: #fff;
+            background-color: #FFFFFFF8;
             color: #333;
         }
     </style>
@@ -180,9 +181,9 @@
 
             // Reducir el tamaño si el formato es 12 horas
             if (format === 12) {
-                clockText.style.fontSize = 'clamp(24px, 10vw, 54px)';
+                clockText.style.fontSize = 'clamp(30px, 12vw, 66px)'; /* Ajuste para 12h */
             } else {
-                clockText.style.fontSize = 'clamp(30px, 12vw, 64px)';
+                clockText.style.fontSize = 'clamp(36px, 14vw, 72px)'; /* Ajuste para 24h */
             }
         }
 
