@@ -34,6 +34,7 @@
             color: #fff;
             text-align: center;
             transition: background-color 0.3s, color 0.3s;
+            position: relative;
         }
 
         .clock-text {
@@ -118,12 +119,23 @@
             background-color: #FFFFFFF8;
             color: #333;
         }
+
+        .watermark {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            width: 15%;
+            max-width: 50px;
+            opacity: 100.10;
+            transition: opacity 0.3s;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="clock-widget" id="clock">
             <span class="clock-text" id="clock-text">00:00</span>
+            <img id="watermark" src="https://i.postimg.cc/tJYWLWcm/20241220-233713-0000.png" alt="Marca de agua" class="watermark">
         </div>
         <button class="toggle-button" id="toggle-btn">&#9788;</button>
         <button class="menu-button" id="menu-btn">&#9776;</button>
@@ -149,6 +161,7 @@
 
         const formatSelect = document.getElementById('format');
         const timezoneSelector = document.getElementById('timezone');
+        const watermark = document.getElementById('watermark');
 
         // Llenar el selector con zonas horarias
         const timezones = Intl.supportedValuesOf('timeZone');
@@ -176,6 +189,7 @@
             if (isLightMode) {
                 document.body.classList.add('light-mode');
                 document.getElementById('toggle-btn').innerHTML = '&#9790;';
+                watermark.src = "https://i.postimg.cc/bJ61C3mt/20241220-233700-0000.png";
             }
         }
 
@@ -215,6 +229,10 @@
 
         document.getElementById('toggle-btn').addEventListener('click', () => {
             document.body.classList.toggle('light-mode');
+            const isLightMode = document.body.classList.contains('light-mode');
+            watermark.src = isLightMode 
+                ? "https://i.postimg.cc/bJ61C3mt/20241220-233700-0000.png" 
+                : "https://i.postimg.cc/tJYWLWcm/20241220-233713-0000.png";
             saveSettings();
         });
 
