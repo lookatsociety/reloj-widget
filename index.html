@@ -37,7 +37,7 @@
         }
 
         .clock-text {
-            font-size: clamp(36px, 14vw, 72px); /* Aumenta el tamaño de la fuente */
+            font-size: clamp(36px, 14vw, 72px);
             line-height: 1;
             white-space: nowrap;
             transition: font-size 0.3s ease;
@@ -99,14 +99,13 @@
             font-size: 16px;
         }
 
-        /* Modo Claro con Blanco de Notion */
         .light-mode .clock-widget {
-            background-color: #FFFFFFF8; /* Blanco de Notion */
+            background-color: #FFFFFFF8;
             color: #333;
         }
 
         .light-mode {
-            background-color: #FFFFFFF8; /* Blanco de Notion */
+            background-color: #FFFFFFF8;
         }
 
         .light-mode .toggle-button,
@@ -133,7 +132,7 @@
             <label>
                 Formato:
                 <select id="format">
-                    <option value="24" selected>24 horas</option>
+                    <option value="24">24 horas</option>
                     <option value="12">12 horas</option>
                 </select>
             </label>
@@ -148,8 +147,10 @@
         let format = 24;
         let timezone = 'local';
 
-        // Llenar el selector con todas las zonas horarias disponibles
+        const formatSelect = document.getElementById('format');
         const timezoneSelector = document.getElementById('timezone');
+
+        // Llenar el selector con zonas horarias
         const timezones = Intl.supportedValuesOf('timeZone');
         timezones.forEach(tz => {
             const option = document.createElement('option');
@@ -157,7 +158,33 @@
             option.textContent = tz;
             timezoneSelector.appendChild(option);
         });
-        timezoneSelector.value = 'local';
+
+        // Cargar configuraciones desde LocalStorage
+        function loadSettings() {
+            const savedFormat = localStorage.getItem('clockFormat');
+            const savedTimezone = localStorage.getItem('clockTimezone');
+            const isLightMode = localStorage.getItem('lightMode') === 'true';
+
+            if (savedFormat) {
+                format = parseInt(savedFormat);
+                formatSelect.value = savedFormat;
+            }
+            if (savedTimezone) {
+                timezone = savedTimezone;
+                timezoneSelector.value = savedTimezone;
+            }
+            if (isLightMode) {
+                document.body.classList.add('light-mode');
+                document.getElementById('toggle-btn').innerHTML = '&#9790;';
+            }
+        }
+
+        // Guardar configuraciones en LocalStorage
+        function saveSettings() {
+            localStorage.setItem('clockFormat', format);
+            localStorage.setItem('clockTimezone', timezone);
+            localStorage.setItem('lightMode', document.body.classList.contains('light-mode'));
+        }
 
         function updateClock() {
             const now = new Date();
@@ -179,21 +206,16 @@
             const clockText = document.getElementById('clock-text');
             clockText.textContent = timeString;
 
-            // Reducir el tamaño si el formato es 12 horas
-            if (format === 12) {
-                clockText.style.fontSize = 'clamp(30px, 12vw, 66px)'; /* Ajuste para 12h */
-            } else {
-                clockText.style.fontSize = 'clamp(36px, 14vw, 72px)'; /* Ajuste para 24h */
-            }
+            clockText.style.fontSize = format === 12 ? 'clamp(30px, 12vw, 66px)' : 'clamp(36px, 14vw, 72px)';
         }
 
         setInterval(updateClock, 1000);
         updateClock();
+        loadSettings();
 
         document.getElementById('toggle-btn').addEventListener('click', () => {
             document.body.classList.toggle('light-mode');
-            const toggleBtn = document.getElementById('toggle-btn');
-            toggleBtn.innerHTML = document.body.classList.contains('light-mode') ? '&#9790;' : '&#9788;';
+            saveSettings();
         });
 
         document.getElementById('menu-btn').addEventListener('click', () => {
@@ -201,13 +223,15 @@
             menu.style.display = menu.style.display === 'flex' ? 'none' : 'flex';
         });
 
-        document.getElementById('format').addEventListener('change', (e) => {
+        formatSelect.addEventListener('change', (e) => {
             format = parseInt(e.target.value);
+            saveSettings();
             updateClock();
         });
 
         timezoneSelector.addEventListener('change', (e) => {
             timezone = e.target.value;
+            saveSettings();
             updateClock();
         });
     </script>
