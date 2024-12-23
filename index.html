@@ -38,7 +38,7 @@
         }
 
         .clock-text {
-            font-size: clamp(36px, 14vw, 72px);
+            font-size: clamp(46px, 16vw, 80px); /* Tamaño incrementado para mayor visibilidad */
             line-height: 1;
             white-space: nowrap;
             transition: font-size 0.3s ease;
@@ -120,13 +120,38 @@
             color: #333;
         }
 
+        /* Modo farol */
+        .lantern-mode .clock-widget {
+            background-color: #FF4500;
+            color: #FFFF00;
+        }
+
+        .lantern-mode {
+            background-color: #191919;
+        }
+
+        .lantern-mode .menu {
+            background-color: #191919;
+            color: #FFFF00;
+        }
+
         .watermark {
             position: absolute;
             bottom: 10px;
             left: 10px;
             width: 15%;
             max-width: 50px;
-            opacity: 100.10;
+            opacity: 1;
+            transition: opacity 0.3s;
+        }
+
+        .watermark-right {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            width: 15%;
+            max-width: 50px;
+            opacity: 1;
             transition: opacity 0.3s;
         }
     </style>
@@ -136,6 +161,7 @@
         <div class="clock-widget" id="clock">
             <span class="clock-text" id="clock-text">00:00</span>
             <img id="watermark" src="https://i.postimg.cc/tJYWLWcm/20241220-233713-0000.png" alt="Marca de agua" class="watermark">
+            <img id="watermark-right" src="https://i.postimg.cc/J0H1pZjQ/20241223-005656-0000.png" alt="Marca de agua derecha" class="watermark-right">
         </div>
         <button class="toggle-button" id="toggle-btn">&#9788;</button>
         <button class="menu-button" id="menu-btn">&#9776;</button>
@@ -152,18 +178,28 @@
                 Zona Horaria:
                 <select id="timezone"></select>
             </label>
+            <label>
+                Modo de Apariencia:
+                <select id="appearance">
+                    <option value="default">Predeterminado</option>
+                    <option value="light">Claro</option>
+                    <option value="lantern">Farol</option>
+                </select>
+            </label>
         </div>
     </div>
 
     <script>
         let format = 24;
         let timezone = 'local';
+        let appearance = 'default';
 
         const formatSelect = document.getElementById('format');
         const timezoneSelector = document.getElementById('timezone');
+        const appearanceSelector = document.getElementById('appearance');
         const watermark = document.getElementById('watermark');
+        const watermarkRight = document.getElementById('watermark-right');
 
-        // Llenar el selector con zonas horarias
         const timezones = Intl.supportedValuesOf('timeZone');
         timezones.forEach(tz => {
             const option = document.createElement('option');
@@ -172,11 +208,10 @@
             timezoneSelector.appendChild(option);
         });
 
-        // Cargar configuraciones desde LocalStorage
         function loadSettings() {
             const savedFormat = localStorage.getItem('clockFormat');
             const savedTimezone = localStorage.getItem('clockTimezone');
-            const isLightMode = localStorage.getItem('lightMode') === 'true';
+            const savedAppearance = localStorage.getItem('appearance');
 
             if (savedFormat) {
                 format = parseInt(savedFormat);
@@ -186,18 +221,16 @@
                 timezone = savedTimezone;
                 timezoneSelector.value = savedTimezone;
             }
-            if (isLightMode) {
-                document.body.classList.add('light-mode');
-                document.getElementById('toggle-btn').innerHTML = '&#9790;';
-                watermark.src = "https://i.postimg.cc/bJ61C3mt/20241220-233700-0000.png";
+            if (savedAppearance) {
+                appearance = savedAppearance;
+                applyAppearance();
             }
         }
 
-        // Guardar configuraciones en LocalStorage
         function saveSettings() {
             localStorage.setItem('clockFormat', format);
             localStorage.setItem('clockTimezone', timezone);
-            localStorage.setItem('lightMode', document.body.classList.contains('light-mode'));
+            localStorage.setItem('appearance', appearance);
         }
 
         function updateClock() {
@@ -205,22 +238,35 @@
             let hours = now.getHours();
             const minutes = now.getMinutes().toString().padStart(2, '0');
 
-            if (format === 12) {
+            if (timezone !== 'local') {
+                const options = { timeZone: timezone, hour: '2-digit', minute: '2-digit', hour12: format === 12 };
+                const formatter = new Intl.DateTimeFormat('es-ES', options);
+                const timeParts = formatter.formatToParts(now);
+
+                hours = timeParts.find(part => part.type === 'hour').value;
+            } else if (format === 12) {
                 hours = hours % 12 || 12;
             }
 
-            let timeString;
-            if (timezone !== 'local') {
-                const options = { timeZone: timezone, hour: '2-digit', minute: '2-digit', hour12: format === 12 };
-                timeString = new Intl.DateTimeFormat('es-ES', options).format(now);
+            const timeString = `${hours.toString().padStart(2, '0')}:${minutes}`;
+            document.getElementById('clock-text').textContent = timeString;
+        }
+
+        function applyAppearance() {
+            document.body.className = '';
+            document.body.classList.add(`${appearance}-mode`);
+
+            if (appearance === 'light') {
+                watermark.src = 'https://i.postimg.cc/bJ61C3mt/20241220-233700-0000.png';
+                watermarkRight.style.display = 'none';
+            } else if (appearance === 'lantern') {
+                watermarkRight.style.display = 'block';
             } else {
-                timeString = `${hours.toString().padStart(2, '0')}:${minutes}`;
+                watermark.src = 'https://i.postimg.cc/tJYWLWcm/20241220-233713-0000.png'; /* Imagen correcta para el modo oscuro */
+                watermarkRight.style.display = 'none';
             }
 
-            const clockText = document.getElementById('clock-text');
-            clockText.textContent = timeString;
-
-            clockText.style.fontSize = format === 12 ? 'clamp(30px, 12vw, 66px)' : 'clamp(36px, 14vw, 72px)';
+            saveSettings();
         }
 
         setInterval(updateClock, 1000);
@@ -228,12 +274,8 @@
         loadSettings();
 
         document.getElementById('toggle-btn').addEventListener('click', () => {
-            document.body.classList.toggle('light-mode');
-            const isLightMode = document.body.classList.contains('light-mode');
-            watermark.src = isLightMode 
-                ? "https://i.postimg.cc/bJ61C3mt/20241220-233700-0000.png" 
-                : "https://i.postimg.cc/tJYWLWcm/20241220-233713-0000.png";
-            saveSettings();
+            appearance = appearance === 'light' ? 'default' : 'light';
+            applyAppearance();
         });
 
         document.getElementById('menu-btn').addEventListener('click', () => {
@@ -251,6 +293,11 @@
             timezone = e.target.value;
             saveSettings();
             updateClock();
+        });
+
+        appearanceSelector.addEventListener('change', (e) => {
+            appearance = e.target.value;
+            applyAppearance();
         });
     </script>
 </body>
