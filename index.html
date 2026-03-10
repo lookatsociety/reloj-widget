@@ -270,34 +270,96 @@
             left: 10px;
         }
 
+        .menu-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0);
+            z-index: 999;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        .menu-backdrop.active {
+            background-color: rgba(0, 0, 0, 0.4);
+            opacity: 1;
+            visibility: visible;
+        }
+
         .menu {
             position: absolute;
             top: 50px;
             left: 10px;
             width: 280px;
             max-width: calc(100% - 20px);
-            z-index: 1000;
-            background-color: #1f1f1f;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-            padding: 15px;
+            z-index: 1001;
+            background: linear-gradient(135deg, #252525 0%, #1f1f1f 100%);
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.1);
+            padding: 20px;
             display: none;
             flex-direction: column;
-            gap: 15px;
+            gap: 18px;
             color: #fff;
             font-size: 14px;
-            max-height: 300px;
+            max-height: 400px;
             overflow-y: auto;
+            transform: translateY(-10px);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
-        .menu select, .menu label {
-            background-color: #333;
+        .menu.active {
+            display: flex;
+            transform: translateY(0);
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .menu label {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            font-weight: 500;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #aaa;
+        }
+
+        .menu select {
+            background-color: #2a2a2a;
             color: #fff;
-            border: none;
-            border-radius: 5px;
-            padding: 10px;
+            border: 1px solid #3a3a3a;
+            border-radius: 6px;
+            padding: 10px 12px;
             width: 100%;
-            font-size: 16px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            background-size: 16px;
+            padding-right: 36px;
+        }
+
+        .menu select:hover {
+            background-color: #323232;
+            border-color: #4a4a4a;
+        }
+
+        .menu select:focus {
+            outline: none;
+            background-color: #323232;
+            border-color: #666;
+            box-shadow: 0 0 0 2px rgba(100, 150, 255, 0.2);
         }
 
         .light-mode .clock-widget {
@@ -345,8 +407,30 @@
         }
 
         .light-mode .menu {
-            background-color: #FFFFFFF8;
+            background: linear-gradient(135deg, #f5f5f5 0%, #efefef 100%);
             color: #333;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(0, 0, 0, 0.1);
+        }
+
+        .light-mode .menu label {
+            color: #666;
+        }
+
+        .light-mode .menu select {
+            background-color: #fff;
+            color: #333;
+            border: 1px solid #ddd;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23333' stroke-width='2'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+        }
+
+        .light-mode .menu select:hover {
+            background-color: #f9f9f9;
+            border-color: #bbb;
+        }
+
+        .light-mode .menu select:focus {
+            border-color: #999;
+            box-shadow: 0 0 0 2px rgba(100, 150, 255, 0.2);
         }
 
         .lantern-mode .clock-widget {
@@ -359,8 +443,30 @@
         }
 
         .lantern-mode .menu {
-            background-color: #191919;
+            background: linear-gradient(135deg, #FF6500 0%, #FF4500 100%);
             color: #FFFF00;
+            box-shadow: 0 8px 32px rgba(255, 69, 0, 0.4), 0 0 0 1px rgba(255, 255, 0, 0.2);
+        }
+
+        .lantern-mode .menu label {
+            color: #FFDD00;
+        }
+
+        .lantern-mode .menu select {
+            background-color: rgba(255, 255, 0, 0.1);
+            color: #FFFF00;
+            border: 1px solid #FFAA00;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23FFFF00' stroke-width='2'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+        }
+
+        .lantern-mode .menu select:hover {
+            background-color: rgba(255, 255, 0, 0.15);
+            border-color: #FFFF00;
+        }
+
+        .lantern-mode .menu select:focus {
+            border-color: #FFFF00;
+            box-shadow: 0 0 0 2px rgba(255, 255, 0, 0.2);
         }
 
         .watermark {
@@ -429,7 +535,7 @@
         </div>
         <button class="toggle-button" id="toggle-btn">&#9788;</button>
         <button class="menu-button" id="menu-btn">&#9776;</button>
-
+        <div class="menu-backdrop" id="menu-backdrop"></div>
         <div class="menu" id="config-menu">
             <label>
                 Formato:
@@ -538,6 +644,11 @@
         function nextMode() {
             currentMode = (currentMode + 1) % modes.length;
             resetTimer();
+        }
+
+        function togglePomodoroConfig() {
+            const config = document.getElementById('pomodoro-config');
+            config.classList.toggle('show');
         }
 
         updateDisplay();
@@ -653,7 +764,16 @@
 
         document.getElementById('menu-btn').addEventListener('click', () => {
             const menu = document.getElementById('config-menu');
-            menu.style.display = menu.style.display === 'flex' ? 'none' : 'flex';
+            const backdrop = document.getElementById('menu-backdrop');
+            menu.classList.toggle('active');
+            backdrop.classList.toggle('active');
+        });
+
+        document.getElementById('menu-backdrop').addEventListener('click', () => {
+            const menu = document.getElementById('config-menu');
+            const backdrop = document.getElementById('menu-backdrop');
+            menu.classList.remove('active');
+            backdrop.classList.remove('active');
         });
 
         formatSelect.addEventListener('change', (e) => {
@@ -675,18 +795,15 @@
 
         pomodoroSelector.addEventListener('change', (e) => {
             pomodoroMode = e.target.value === 'on';
-            pomodoroSeconds = 25 * 60;
-            document.getElementById('clock').classList.toggle('pomodoro-active', pomodoroMode);
             saveSettings();
+            const clock = document.getElementById('clock');
+            if (pomodoroMode) {
+                clock.classList.add('pomodoro-active');
+            } else {
+                clock.classList.remove('pomodoro-active');
+            }
+            updateClock();
         });
-
-        function togglePomodoroConfig() {
-            const config = document.getElementById('pomodoro-config');
-            config.classList.toggle('show');
-        }
-
-        // Initial Pomodoro state
-        document.getElementById('clock').classList.toggle('pomodoro-active', pomodoroMode);
     </script>
 </body>
 </html>
