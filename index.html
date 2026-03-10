@@ -5,6 +5,199 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Widget de Reloj</title>
     <style>
+        .clock-widget {
+            flex-direction: column;
+            padding: 20px;
+            gap: 20px;
+        }
+
+        .clock-text {
+            font-size: clamp(100px, 25vw, 160px);
+            line-height: 1;
+            transition: font-size 0.3s ease;
+        }
+
+        .pomodoro-container {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .pomodoro-active .pomodoro-container {
+            display: flex;
+        }
+
+        .pomodoro-active .clock-text {
+            display: none;
+        }
+
+        .mode-slider {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin: 20px 0 10px 0;
+            width: 100%;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .pomodoro-container:hover .mode-slider,
+        .mode-slider:hover {
+            opacity: 1;
+        }
+
+        .slide-btn {
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 5px;
+            z-index: 10;
+        }
+
+        .mode {
+            font-size: 12px;
+            min-width: 80px;
+            text-align: center;
+        }
+
+        .timer-display {
+            font-size: clamp(28px, 10vw, 48px);
+            margin: 10px 0;
+            line-height: 1;
+        }
+
+        .config-btn {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 5px;
+            z-index: 2;
+            opacity: 0.7;
+            transition: opacity 0.3s;
+        }
+
+        .config-btn:hover {
+            opacity: 1;
+        }
+
+        .timer-config {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #2a2a2a;
+            border-radius: 10px;
+            padding: 20px;
+            display: none;
+            width: 80%;
+            max-width: 300px;
+            z-index: 3;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+
+        .timer-config.show {
+            display: block;
+        }
+
+        .config-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #444;
+            padding-bottom: 10px;
+        }
+
+        .config-header h3 {
+            margin: 0;
+            color: #fff;
+        }
+
+        .close-config {
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        .config-inputs {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .config-inputs label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 14px;
+            color: #fff;
+        }
+
+        .config-inputs input {
+            width: 60px;
+            padding: 5px;
+            border: 1px solid #444;
+            background: #333;
+            color: #fff;
+            text-align: center;
+            border-radius: 4px;
+        }
+
+        .unit {
+            color: #888;
+            margin-left: 5px;
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            transition: opacity 0.3s;
+            opacity: 0;
+            margin-top: 10px;
+            z-index: 10;
+        }
+
+        .pomodoro-container:hover .controls {
+            opacity: 1;
+        }
+
+        .controls button {
+            background: none;
+            border: 2px solid #fff;
+            color: #fff;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .controls button:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: scale(1.1);
+        }
+
+        .controls button:active {
+            transform: scale(0.95);
+        }
+
+        .light-mode .controls button:hover {
+            background: rgba(0, 0, 0, 0.1);
+        }
+
         body {
             margin: 0;
             font-family: Arial, sans-serif;
@@ -21,10 +214,10 @@
         }
 
         .clock-widget {
-            width: 90vw;
-            max-width: 300px;
-            height: 90vw;
-            max-height: 300px;
+            width: 60vw;
+            max-width: 200px;
+            height: 60vw;
+            max-height: 200px;
             border-radius: 15px;
             background-color: #1f1f1f;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
@@ -38,7 +231,7 @@
         }
 
         .clock-text {
-            font-size: clamp(46px, 16vw, 80px); /* Tamaño incrementado para mayor visibilidad */
+            font-size: clamp(36px, 12vw, 60px);
             line-height: 1;
             white-space: nowrap;
             transition: font-size 0.3s ease;
@@ -46,18 +239,25 @@
 
         .toggle-button, .menu-button {
             position: absolute;
-            width: 35px;
-            height: 35px;
-            background-color: #333;
+            width: 40px;
+            height: 40px;
+            background-color: rgba(51, 51, 51, 0.5);
             color: #fff;
             border: none;
             border-radius: 50%;
             cursor: pointer;
-            font-size: 18px;
+            font-size: 20px;
             display: flex;
             align-items: center;
             justify-content: center;
+            backdrop-filter: blur(5px);
             transition: background-color 0.3s, color 0.3s;
+        }
+
+        .light-mode .toggle-button,
+        .light-mode .menu-button {
+            background-color: rgba(255, 255, 255, 0.5);
+            color: #333;
         }
 
         .toggle-button {
@@ -73,10 +273,10 @@
         .menu {
             position: absolute;
             top: 50px;
-            left: 50%;
-            transform: translateX(-50%);
+            left: 10px;
             width: 280px;
-            max-width: 90vw;
+            max-width: calc(100% - 20px);
+            z-index: 1000;
             background-color: #1f1f1f;
             border-radius: 10px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
@@ -105,6 +305,35 @@
             color: #333;
         }
 
+        .light-mode .config-btn,
+        .light-mode .slide-btn,
+        .light-mode .mode,
+        .light-mode .timer-display,
+        .light-mode .controls button {
+            color: #333;
+        }
+
+        .light-mode .controls button {
+            border-color: #333;
+        }
+
+        .light-mode .timer-config {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .light-mode .timer-config .config-header h3,
+        .light-mode .timer-config .close-config,
+        .light-mode .timer-config .config-inputs label {
+            color: #333;
+        }
+
+        .light-mode .timer-config input {
+            background: #fff;
+            border-color: #ccc;
+            color: #333;
+        }
+
         .light-mode {
             background-color: #FFFFFFF8;
         }
@@ -120,7 +349,6 @@
             color: #333;
         }
 
-        /* Modo farol */
         .lantern-mode .clock-widget {
             background-color: #FF4500;
             color: #FFFF00;
@@ -159,7 +387,43 @@
 <body>
     <div class="container">
         <div class="clock-widget" id="clock">
-            <span class="clock-text" id="clock-text">00:00</span>
+            <div class="clock-text" id="clock-text">12:00</div>
+            <div class="pomodoro-container">
+                <button class="config-btn" onclick="togglePomodoroConfig()">&#9881;</button>
+                <div class="timer-config" id="pomodoro-config">
+                    <div class="config-header">
+                        <h3>Configuración</h3>
+                        <button class="close-config" onclick="togglePomodoroConfig()">×</button>
+                    </div>
+                    <div class="config-inputs">
+                        <label>
+                            <span>Pomodoro</span>
+                            <input type="number" id="pomodoro-time" value="25" min="1" max="60" onchange="updateTimerConfig()">
+                            <span class="unit">min</span>
+                        </label>
+                        <label>
+                            <span>Descanso Corto</span>
+                            <input type="number" id="short-break-time" value="5" min="1" max="30" onchange="updateTimerConfig()">
+                            <span class="unit">min</span>
+                        </label>
+                        <label>
+                            <span>Descanso Largo</span>
+                            <input type="number" id="long-break-time" value="15" min="1" max="60" onchange="updateTimerConfig()">
+                            <span class="unit">min</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="mode-slider">
+                    <button class="slide-btn" onclick="prevMode()">◀</button>
+                    <div class="mode" id="mode-name">Pomodoro</div>
+                    <button class="slide-btn" onclick="nextMode()">▶</button>
+                </div>
+                <div class="timer-display" id="timer-display">25:00</div>
+                <div class="controls">
+                    <button onclick="startPauseTimer()" id="start-pause-btn">▶</button>
+                    <button onclick="resetTimer()">⟲</button>
+                </div>
+            </div>
             <img id="watermark" src="https://github.com/lookatsociety/RECURSOS/blob/679a8d7e507aae340aef0ea302c852038e44b509/lookat%20white.png?raw=true" alt="Marca de agua" class="watermark">
             <img id="watermark-right" src="https://github.com/lookatsociety/RECURSOS/blob/3b09b437172e60047fec889d2494c2efd3d844b7/%E6%96%B0_20241223_005656_0000.png?raw=true" alt="Marca de agua derecha" class="watermark-right">
         </div>
@@ -186,17 +450,108 @@
                     <option value="lantern">Farol</option>
                 </select>
             </label>
+            <label>
+                Modo Pomodoro:
+                <select id="pomodoro-mode">
+                    <option value="off">Desactivado</option>
+                    <option value="on">Activado</option>
+                </select>
+            </label>
         </div>
     </div>
 
     <script>
+        let modes = [
+            { name: "Pomodoro", duration: 25 * 60 },
+            { name: "Short Break", duration: 5 * 60 },
+            { name: "Long Break", duration: 15 * 60 }
+        ];
+
+        function updateTimerConfig() {
+            const pomodoroTime = parseInt(document.getElementById('pomodoro-time').value);
+            const shortBreakTime = parseInt(document.getElementById('short-break-time').value);
+            const longBreakTime = parseInt(document.getElementById('long-break-time').value);
+
+            modes = [
+                { name: "Pomodoro", duration: pomodoroTime * 60 },
+                { name: "Short Break", duration: shortBreakTime * 60 },
+                { name: "Long Break", duration: longBreakTime * 60 }
+            ];
+
+            remainingTime = modes[currentMode].duration;
+            updateDisplay();
+        }
+
+        let currentMode = 0;
+        let timer;
+        let isRunning = false;
+        let remainingTime = modes[currentMode].duration;
+
+        function updateDisplay() {
+            const minutes = Math.floor(remainingTime / 60).toString().padStart(2, '0');
+            const seconds = (remainingTime % 60).toString().padStart(2, '0');
+            document.getElementById('timer-display').textContent = `${minutes}:${seconds}`;
+            document.getElementById('mode-name').textContent = modes[currentMode].name;
+        }
+
+        function startPauseTimer() {
+            const startPauseBtn = document.getElementById('start-pause-btn');
+            const pomodoroContainer = document.querySelector('.pomodoro-container');
+            if (isRunning) {
+                clearInterval(timer);
+                isRunning = false;
+                startPauseBtn.textContent = '▶';
+                pomodoroContainer.classList.remove('running');
+            } else {
+                timer = setInterval(() => {
+                    if (remainingTime > 0) {
+                        remainingTime--;
+                        updateDisplay();
+                    } else {
+                        clearInterval(timer);
+                        isRunning = false;
+                        startPauseBtn.textContent = '▶';
+                        pomodoroContainer.classList.remove('running');
+                        const audio = new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg');
+                        audio.play();
+                    }
+                }, 1000);
+                isRunning = true;
+                startPauseBtn.textContent = '⏸';
+                pomodoroContainer.classList.add('running');
+            }
+        }
+
+        function resetTimer() {
+            clearInterval(timer);
+            isRunning = false;
+            document.getElementById('start-pause-btn').textContent = '▶';
+            remainingTime = modes[currentMode].duration;
+            updateDisplay();
+        }
+
+        function prevMode() {
+            currentMode = (currentMode - 1 + modes.length) % modes.length;
+            resetTimer();
+        }
+
+        function nextMode() {
+            currentMode = (currentMode + 1) % modes.length;
+            resetTimer();
+        }
+
+        updateDisplay();
         let format = 24;
         let timezone = 'local';
         let appearance = 'default';
+        let pomodoroMode = false;
+        let pomodoroSeconds = 25 * 60;
+        let pomodoroActive = false;
 
         const formatSelect = document.getElementById('format');
         const timezoneSelector = document.getElementById('timezone');
         const appearanceSelector = document.getElementById('appearance');
+        const pomodoroSelector = document.getElementById('pomodoro-mode');
         const watermark = document.getElementById('watermark');
         const watermarkRight = document.getElementById('watermark-right');
 
@@ -212,6 +567,7 @@
             const savedFormat = localStorage.getItem('clockFormat');
             const savedTimezone = localStorage.getItem('clockTimezone');
             const savedAppearance = localStorage.getItem('appearance');
+            const savedPomodoro = localStorage.getItem('pomodoroMode');
 
             if (savedFormat) {
                 format = parseInt(savedFormat);
@@ -225,15 +581,31 @@
                 appearance = savedAppearance;
                 applyAppearance();
             }
+            if (savedPomodoro === 'on') {
+                pomodoroMode = true;
+                pomodoroSelector.value = 'on';
+            }
         }
 
         function saveSettings() {
             localStorage.setItem('clockFormat', format);
             localStorage.setItem('clockTimezone', timezone);
             localStorage.setItem('appearance', appearance);
+            localStorage.setItem('pomodoroMode', pomodoroMode ? 'on' : 'off');
         }
 
         function updateClock() {
+            if (pomodoroMode) {
+                if (pomodoroSeconds <= 0) {
+                    pomodoroSeconds = 25 * 60;
+                }
+                const minutes = Math.floor(pomodoroSeconds / 60).toString().padStart(2, '0');
+                const seconds = (pomodoroSeconds % 60).toString().padStart(2, '0');
+                document.getElementById('clock-text').textContent = `${minutes}:${seconds}`;
+                pomodoroSeconds--;
+                return;
+            }
+
             const now = new Date();
             let hours = now.getHours();
             const minutes = now.getMinutes().toString().padStart(2, '0');
@@ -242,7 +614,6 @@
                 const options = { timeZone: timezone, hour: '2-digit', minute: '2-digit', hour12: format === 12 };
                 const formatter = new Intl.DateTimeFormat('es-ES', options);
                 const timeParts = formatter.formatToParts(now);
-
                 hours = timeParts.find(part => part.type === 'hour').value;
             } else if (format === 12) {
                 hours = hours % 12 || 12;
@@ -262,16 +633,18 @@
             } else if (appearance === 'lantern') {
                 watermarkRight.style.display = 'block';
             } else {
-                watermark.src = 'https://github.com/lookatsociety/RECURSOS/blob/679a8d7e507aae340aef0ea302c852038e44b509/lookat%20white.png?raw=true'; /* Imagen correcta para el modo oscuro */
+                watermark.src = 'https://github.com/lookatsociety/RECURSOS/blob/679a8d7e507aae340aef0ea302c852038e44b509/lookat%20white.png?raw=true';
                 watermarkRight.style.display = 'none';
             }
 
             saveSettings();
         }
 
-        setInterval(updateClock, 1000);
-        updateClock();
-        loadSettings();
+        document.addEventListener('DOMContentLoaded', () => {
+            setInterval(updateClock, 1000);
+            updateClock();
+            loadSettings();
+        });
 
         document.getElementById('toggle-btn').addEventListener('click', () => {
             appearance = appearance === 'light' ? 'default' : 'light';
@@ -299,6 +672,21 @@
             appearance = e.target.value;
             applyAppearance();
         });
+
+        pomodoroSelector.addEventListener('change', (e) => {
+            pomodoroMode = e.target.value === 'on';
+            pomodoroSeconds = 25 * 60;
+            document.getElementById('clock').classList.toggle('pomodoro-active', pomodoroMode);
+            saveSettings();
+        });
+
+        function togglePomodoroConfig() {
+            const config = document.getElementById('pomodoro-config');
+            config.classList.toggle('show');
+        }
+
+        // Initial Pomodoro state
+        document.getElementById('clock').classList.toggle('pomodoro-active', pomodoroMode);
     </script>
 </body>
 </html>
